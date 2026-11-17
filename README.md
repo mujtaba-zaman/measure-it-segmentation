@@ -45,4 +45,3 @@ A phone cannot photograph itself for this setup: use the iPhone 12 camera to pho
 5. For the accuracy comparison, measure the object's width and height with a ruler/calliper, then take 10+ separate placements/photos and record ground truth for each. A low-cost digital calliper is preferable; a ruler with millimetre markings is acceptable for a rough prototype, but report its resolution as a limitation. Keep raw and undistorted measurements paired by image.
 
 If you want to measure the iPhone 12 itself, borrow another camera for the photos. Your target choice is set to the second smartphone. A Git commit display name and email are still needed before commits can be created.
-
