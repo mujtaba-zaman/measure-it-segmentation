@@ -2,8 +2,8 @@
 
 Evidence must be recorded beside each item. Empty means not done; do not tick without evidence.
 
-- [ ] Camera calibration uses >=20 captured checkerboard/ChArUco views; reprojection error and parameter file recorded. Evidence:
-- [ ] >=70 own images captured with the calibrated camera, undistorted, and labelled; split list committed before training. Evidence:
+- [ ] Camera calibration uses >=20 captured checkerboard/ChArUco views; reprojection error and parameter file recorded. Evidence: 20 views, RMS 1.565 px, mean per-view 1.150 px in `calibration/intrinsics.json`.
+- [ ] >=70 own images captured with the calibrated camera, undistorted, and labelled; split list committed before training. Evidence so far: 100 raw images and undistorted copies; split committed as `975d786`; masks still pending.
 - [ ] Trained non-Ultralytics, non-Roboflow segmentation model evaluated only on held-out test data (IoU, mAP@0.5, mAP@0.5:0.95, precision, recall). Evidence:
 - [ ] One command accepts a new image and emits overlay, width/height in mm and confidence; object/reference missing cases handled. Evidence:
 - [ ] >=10 instances compared with calliper; per-instance errors, mean/median/worst absolute error and mean percentage error reported. Evidence:

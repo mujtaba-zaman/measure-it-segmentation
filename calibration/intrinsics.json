@@ -1,0 +1,39 @@
+{
+  "camera_matrix": [
+    [
+      977.5998794031733,
+      0.0,
+      642.3714666380241
+    ],
+    [
+      0.0,
+      976.868563828959,
+      483.70777422763945
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "distortion_coefficients": [
+    0.18585231026933519,
+    -0.6570896118195777,
+    0.0037003522623027993,
+    -0.0002785135562126319,
+    0.7434952459613006
+  ],
+  "image_size_px": [
+    1280,
+    960
+  ],
+  "checkerboard_inner_corners": [
+    9,
+    7
+  ],
+  "orientation_normalization": "portrait frames rotated 90 degrees clockwise to landscape; checkerboard axis order may be transposed per view",
+  "square_size_mm": 20.0,
+  "views_used": 20,
+  "rms_reprojection_error_px": 1.5654574867637479,
+  "mean_view_reprojection_error_px": 1.1504367575049401
+}

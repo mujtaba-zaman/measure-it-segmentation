@@ -1,47 +1,54 @@
-# Measure It — Segmentation and Metric Measurement
+# Measure It - Segmentation and Metric Measurement
 
-An 8-hour AI/CV assessment starter. It calibrates a fixed camera, trains a torchvision Mask R-CNN on your own binary object masks, then measures a flat object against a coplanar ArUco square of measured size. The reference marker supplies scale; it is not the object segmenter. Ultralytics YOLO and Roboflow segmentation models are not used.
+AI/CV assessment project for measuring a flat object in millimetres. It calibrates a fixed camera with OpenCV, trains a torchvision Mask R-CNN on reviewed masks of project-captured photos, and uses a measured coplanar ArUco marker as the image scale reference. YOLO and Roboflow segmentation models are not used.
 
-## Important before running
+## Dataset and current results
 
-The committed split reserves 70 train / 20 validation / 10 test image names. Capture at least 100 images and rename/copy them to those names before annotation. These are placeholders, not captured data. Replace the reserved file lists once with your final dataset and commit them **before any training**; never move test images after inspecting results. The initial commit could not be authored automatically because this machine has no configured Git author identity.
-
-The pipeline assumes one foreground object per image, a flat object and reference in the same plane, low camera tilt, and an ArUco DICT_4X4_50 marker. Pixel-to-mm conversion uses the marker's known side length divided by its observed pixel side. Perspective tilt or different object/reference planes invalidate this simple scale.
+- Target: iPhone X photographed with a second phone, reported by the candidate as iPhone 12.
+- 100 unmarked target photos are assigned once to 70 train, 20 validation and 10 test. The split lists and raw-image SHA-256 manifest are frozen in commit `975d786` before training. Test images must not be used for training, tuning or checkpoint selection.
+- The 100 raw photos are preserved under `dataset/raw_images/`; normalized, undistorted copies used for modeling are under `dataset/images/{train,val,test}/`.
+- 20 unique checkerboard views were detected and used. Portrait frames are rotated clockwise into landscape coordinates. Calibration saved to `calibration/intrinsics.json`: image size 1280x960, RMS reprojection error 1.565 px, mean per-view error 1.150 px.
+- 10 target-plus-marker photos are in `dataset/measurement_images/`, but `img_009.jpeg` and `img_010.jpeg` are exact duplicates; there are 9 distinct photos. Retake one before using this as a 10-instance accuracy set.
+- Binary object masks are not yet present. Model training, held-out evaluation and physical accuracy measurement have not run. No model performance or measurement accuracy is claimed.
 
 ## Setup
 
-Use Python 3.10–3.12 in a virtual environment. Install PyTorch/Torchvision using the official command matching your CPU/GPU, then install `requirements.txt`. Keep camera focus, zoom and resolution fixed after calibration. See `docs/Plan.md`, `docs/Objectives.md`, and `docs/Definition-of-Done.md` for the assessment plan, targets and evidence checklist.
+The host has Python 3.15.2. A local `.venv` has the core packages from `requirements.txt` installed. To recreate it:
 
-## Stages
+```powershell
+py -3.15 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
 
-1. Print `calibration/printables/measure-it-printables.pdf` at 100% / actual size with fit-to-page disabled. Page 1 is a 9x7-inner-corner checkerboard (20 mm squares); page 2 is DICT_4X4_50 marker ID 0 (50 mm black outer edge). Check both dimensions with a ruler before use. Put >=20 varied checkerboard images in `calibration/images/`.
-2. `python calibration/calibrate.py --square-mm 20 --columns 9 --rows 7`
-3. Capture object photos with the measured ArUco marker in the same plane. Annotate each target with a binary PNG mask at `dataset/labels/<image-stem>.png`; object pixels nonzero. Place images in `dataset/images/` under the names in split files. Keep the marker visible in every final inference image.
-4. `python models/train.py --epochs 10 --seed 42` (downloads pretrained torchvision backbone weights on first run if not cached). Test split is deliberately not used for training or validation.
-5. `python inference/measure.py path/to/new.jpg --marker-mm 50` (replace 50 with the actual measured marker side).
-6. Record calliper truth and predictions in `measurement/accuracy.csv`, compare raw and undistorted measurements, then run `python measurement/summarize.py measurement/accuracy.csv`.
+Training needs PyTorch and Torchvision from the official PyTorch wheel index. For a CPU-only install:
 
-## Dataset and reproducibility
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-train.txt --index-url https://download.pytorch.org/whl/cpu
+```
 
-Object: **second smartphone (planned)**, photographed with the iPhone 12 rear 1x camera. Capture: **0**. Split reservation: 70/20/10 placeholder names. Labelling tool: **not yet selected**. Random seed: 42. Record OS, CPU/GPU, RAM, camera make/model, resolution, lens/focus settings, Python/library versions, marker measurement, and every deviation. No assessment metrics are claimed until produced by the user's own captured images.
+For CUDA, use the matching index from the official PyTorch installer. A Google Colab GPU runtime is also suitable after uploading the project data and labels.
 
-## Current status / known gaps
+## Workflow
 
-This is a functional pipeline scaffold, not an assessed result. You still need camera calibration images, a selected object, its labelled images, a physical marker and measured size, calliper ground truth for >=10 instances, actual train/test metrics, raw-vs-undistorted comparison, failure-condition experiment, confidence/refusal-cost analysis, and a <=5-minute Loom. The training code reports validation pixel IoU only; proper test-split mask IoU, mAP@0.5, mAP@0.5:0.95, precision and recall still need implementation/evidence before submission. Inference also needs empirical calibration of confidence and reference-visibility/tilt rejection thresholds. No numbers should be entered by hand without raw evidence.
+1. Verify checkerboard square size is 20 mm and measure the marker's black outer edge with a ruler. The PDF says nominally 50 mm, but use the physical measurement.
+2. Calibration already ran on 20 checkerboard images:
+   `\.venv\Scripts\python.exe calibration/calibrate.py --square-mm 20 --columns 9 --rows 7`
+3. Annotate one accurate phone silhouette mask per split image. Run `\.venv\Scripts\python.exe scripts/annotate_masks.py --split train`, then `val`, then `test`. Left-click around the phone outline, press `F` to preview and `S` to save. Masks are 0 background / 255 phone at `dataset/labels/<image-stem>.png`. Review every outline; do not use test results to adjust training.
+4. Train only after masks and the fixed split are committed:
+   `\.venv\Scripts\python.exe models/train.py --epochs 10 --seed 42`
+5. After the checkpoint and confidence threshold are frozen, run the final held-out metrics once:
+   `\.venv\Scripts\python.exe models/evaluate.py --weights models/maskrcnn.pt`
+6. Run the measurement command on a new photo with the marker visible in the same plane:
+   `\.venv\Scripts\python.exe inference/measure.py path\to\new.jpg --marker-mm <measured-size>`
+   Add `--skip-undistortion` for the raw-image comparison and use separate `--output` paths to preserve both overlays.
+7. Compare at least 10 separate placements against ruler/calliper ground truth; report per-instance and summary errors, raw-versus-undistorted performance, one failure condition, and five-run timing.
+8. Complete `docs/Plan.md`, `docs/Objectives.md`, and `docs/Definition-of-Done.md` with evidence. Record a Loom of 5 minutes or less answering the four assessment questions.
 
-## Submission still required
+## Assessment constraints and reproducibility
 
-Create a public GitHub repository under your account, push branch `dev-test01`, make a PR to its main branch, publish weights or a release asset and SHA-256 hash, and send the PR and Loom links as the assessment requests. No public repository or external upload has been created here.
+- Use images captured for this project only. Do not use downloaded object datasets, Ultralytics YOLO, or Roboflow segmentation models. Pretrained backbones are allowed, but the segmentation model must be trained or fine-tuned on the labelled project images.
+- The split files and SHA-256 manifest are committed before training; do not alter the test split afterward.
+- Report only metrics produced from saved raw outputs. AI assistance is allowed by the assessment; the candidate must explain the submitted code and results in the recording.
+- Record OS, CPU/GPU, RAM, camera model, image resolution, focus/zoom settings, library versions, physical marker measurement and any deviation.
 
-
-## Capture guide (iPhone 12)
-
-A phone cannot photograph itself for this setup: use the iPhone 12 camera to photograph a **different** object, or borrow a second camera if the iPhone itself is the target. A phone is a glossy target, so put it on a matte, contrasting background, keep the rear face flat, and keep the ArUco marker flat in the same plane. Avoid reflections and do not let the raised camera island overlap the phone outline.
-
-1. Install the listed dependencies, then run `python calibration/make_printables_pdf.py`. It makes a checkerboard with 9x7 inner corners and 20 mm squares, plus a 50 mm `DICT_4X4_50` marker (ID 0). Print SVGs at **100% / actual size**, with page-fit/shrink disabled. Measure a checker square and the marker's black outer edge with a ruler; if print scaling changed their sizes, use the measured values in the commands. Tape the checkerboard flat to rigid cardboard.
-2. Use the iPhone rear **1x** camera; avoid switching lenses or digital zoom, and keep resolution/orientation constant. Tap-hold to lock focus/exposure where possible. Capture 20+ sharp calibration photos with the board filling different parts of the frame and held at varied tilts/distances. Run calibration with the measured square size, e.g. `python calibration/calibrate.py --square-mm 20`.
-3. Select one matte, flat object with clear edges and a contrasting background. Capture 100 images with the same camera/lens/settings: 70 train, 20 validation, 10 test. Vary position, rotation, distance and ordinary lighting; avoid blur. Include the same measured marker beside the object in every measurement photo, in the same plane. Never use test images to train or choose settings.
-4. Use CVAT or Label Studio to draw one accurate foreground mask per image; export/convert each mask to a PNG with background 0 and object nonzero. Save using the matching image filename stem under `dataset/labels/`. Keep a copy of the split lists and commit them before training.
-5. For the accuracy comparison, measure the object's width and height with a ruler/calliper, then take 10+ separate placements/photos and record ground truth for each. A low-cost digital calliper is preferable; a ruler with millimetre markings is acceptable for a rough prototype, but report its resolution as a limitation. Keep raw and undistorted measurements paired by image.
-
-If you want to measure the iPhone 12 itself, borrow another camera for the photos. Your target choice is set to the second smartphone. A Git commit display name and email are still needed before commits can be created.
+See `docs/Plan.md`, `docs/Objectives.md` and `docs/Definition-of-Done.md` for the decisions, targets and evidence checklist.
