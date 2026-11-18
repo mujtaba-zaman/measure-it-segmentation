@@ -1,0 +1,13 @@
+confidence_threshold,mode,measured_runs,accepted,refused,refused_percent
+0.75,undistorted,10,10,0,0.0
+0.80,undistorted,10,10,0,0.0
+0.85,undistorted,10,10,0,0.0
+0.90,undistorted,10,9,1,10.0
+0.95,undistorted,10,9,1,10.0
+0.99,undistorted,10,6,4,40.0
+0.75,raw,10,10,0,0.0
+0.80,raw,10,10,0,0.0
+0.85,raw,10,10,0,0.0
+0.90,raw,10,10,0,0.0
+0.95,raw,10,8,2,20.0
+0.99,raw,10,6,4,40.0

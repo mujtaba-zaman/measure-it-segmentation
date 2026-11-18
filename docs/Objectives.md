@@ -16,6 +16,11 @@ Set targets before measuring. These are initial working targets and must be revi
 - **Target:** <= 2.0 seconds median on the declared hardware. Rationale: interactive prototype response; revise if hardware makes this impractical.
 - **Conditions:** Record CPU, GPU, RAM, OS, camera, resolution; same model/checkpoint and warm-up policy.
 - **Not included:** Model training time and image capture time.
-- **Status/evidence:** Not measured; no five-run timing data was saved.
+- **Status/evidence:** Not measured yet. `scripts/benchmark_inference.py` runs five cold end-to-end CLI measurements and saves raw runs plus median/range in `measurement/benchmark/`. The laptop TorchVision C++ operator currently fails to load, so execute this script in the existing Colab GPU runtime. Do not substitute the notebook's total cell duration for per-run latency.
+
+## Refusal behavior — marker occlusion
+- **Test:** On `img_001.jpeg`, add an opaque white strip across the marker's upper edge in increasing 5% steps of marker height and rerun the marker contour gate.
+- **Result:** Detection passed at 0–15% synthetic occlusion and refused at 20–60%. Raw outcomes are in `measurement/marker_results/failure_sweep.csv`.
+- **Cost / limitation:** The configured 0.75 mask-confidence cutoff yielded 0 refused images in this 10-photo batch, in either raw or undistorted mode. This is the observed coverage cost on this small batch only. The sweep probes marker detection, not the model's full failure behavior or measurement accuracy.
 
 Report all measured test instances and raw outputs. Do not tune thresholds or checkpoints on the test split.

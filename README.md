@@ -44,7 +44,9 @@ For CUDA, use the matching index from the official PyTorch installer. A Google C
    `\.venv\Scripts\python.exe inference/measure.py path\to\new.jpg --marker-mm <measured-size>`
    Add `--skip-undistortion` for the raw-image comparison and use separate `--output` paths to preserve both overlays.
 7. Current inference is recorded in `measurement/marker_results/fresh_batch/measurement_results.csv`: all 10 photos produced raw and undistorted estimates (20/20 runs). Marker-square detection is in `marker_check.csv` (10/10). Frames 001–004 show the iPhone X; frames 005–010 show a Tecno-branded phone and are reported separately. No calliper ground truth is available; these estimates do not establish accuracy.
-8. Remaining assessment evidence: ten distinct placements of one identified object with calliper ground truth, dimensional-error summaries, raw-versus-undistorted error comparison against ground truth, timing, failure severity sweep, and the <=5-minute Loom.
+8. Controlled refusal evidence: `\.venv\Scripts\python.exe scripts\failure_sweep.py` sweeps synthetic marker occlusion; `\.venv\Scripts\python.exe scripts\summarize_refusal_thresholds.py` reports observed coverage at confidence cutoffs. These are refusal checks only, not dimensional-accuracy tests.
+9. Five-run cold end-to-end timing: in Colab, run `!python scripts/benchmark_inference.py`; it writes per-run timings and a summary under `measurement/benchmark/`. This is not saved yet because the laptop TorchVision operator fails to load.
+10. Still requires candidate evidence: calliper ground truth for at least 10 placements of the same identified object; resulting dimensional-error and raw-vs-undistorted error summaries; a <=5-minute Loom; and authenticated GitHub push/PR. Do not report measurement accuracy without the calliper readings.
 
 ## Assessment constraints and reproducibility
 

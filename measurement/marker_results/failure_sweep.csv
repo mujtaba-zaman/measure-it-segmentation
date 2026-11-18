@@ -1,0 +1,14 @@
+marker_height_occluded_pct,marker_gate,baseline_marker_side_px,synthetic_cover_height_px
+0,PASS,239.01,0px
+5,PASS,239.01,12px
+10,PASS,239.01,24px
+15,PASS,239.01,36px
+20,REFUSE,239.01,48px
+25,REFUSE,239.01,60px
+30,REFUSE,239.01,73px
+35,REFUSE,239.01,85px
+40,REFUSE,239.01,97px
+45,REFUSE,239.01,109px
+50,REFUSE,239.01,121px
+55,REFUSE,239.01,133px
+60,REFUSE,239.01,145px

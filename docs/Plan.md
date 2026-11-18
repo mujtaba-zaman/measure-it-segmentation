@@ -23,7 +23,8 @@ This 8-hour assessment measures one rigid, flat object in the plane of a known-s
 - **Annotation completed:** 100 target masks were saved across the frozen split (70 train / 20 validation / 10 test). `scripts/check_labels.py` reports 70/70, 20/20 and 10/10 masks present, nonempty and size-matched. This structural check does not replace visual review of each contour.
 - **Training completed in Colab:** Mask R-CNN trained for 10 epochs on a Tesla T4. Best validation pixel IoU was 0.9662; held-out test mean mask IoU was 0.9680, mAP50/mAP50:95 were 1.0. These segmentation results do not establish physical measurement accuracy.
 - **Measurement run completed:** all 10 current marker photos produced raw and undistorted estimates (20/20 runs), and the 50 mm square was detected in all 10. Results are saved in `measurement/marker_results/fresh_batch/`. Four frames show the target iPhone X; six show a Tecno-branded phone, so the two device groups must not be combined. No calliper ground truth is available.
-- **Still pending:** calliper ground truth and dimensional-error statistics; raw-vs-undistorted error comparison; timing; controlled failure-severity experiment; Loom; GitHub PR/submission. No dimensional accuracy is claimed.
+- **Additional checks:** a synthetic marker-occlusion sweep passed through 15% obstruction and refused from 20% onward; a confidence-threshold coverage table records the observed refusal cost. These checks do not validate dimensional accuracy.
+- **Still pending:** calliper ground truth and dimensional-error statistics; ground-truth raw-vs-undistorted comparison; five-run latency measurement in Colab; Loom; GitHub authentication/push and PR/submission. No dimensional accuracy is claimed.
 
 ## Decision record
 At scaffold time the approach above is selected; no alternative has yet been empirically evaluated. Update this section if the actual work changes the plan, and record what the change costs.
