@@ -43,8 +43,8 @@ For CUDA, use the matching index from the official PyTorch installer. A Google C
 6. Run the measurement command on a photo with the full marker visible in the same plane:
    `\.venv\Scripts\python.exe inference/measure.py path\to\new.jpg --marker-mm <measured-size>`
    Add `--skip-undistortion` for the raw-image comparison and use separate `--output` paths to preserve both overlays.
-7. Current measurement evidence is in `measurement/marker_results/`. Four of ten frames produced estimates in both raw and undistorted modes; six were refused because the reference could not be isolated. The images include one exact duplicate. These estimates have no calliper ground truth, so do not present them as validated dimensions or measurement-accuracy results.
-8. Remaining assessment evidence: ten distinct placements with calliper ground truth, dimensional-error summaries, raw-versus-undistorted error comparison, timing, failure severity sweep, and the <=5-minute Loom.
+7. Current fresh-batch inference is recorded in `measurement/marker_results/fresh_batch/measurement_results.csv`: all 10 photos produced raw and undistorted estimates (20/20 runs). Marker-square detection is separately recorded in `marker_check.csv` (10/10). The submitted frames 005–010 visibly show a Tecno-branded phone, so keep them identified separately from the iPhone X frames 001–004. No calliper ground truth is available; these are estimates, not validated dimensions or accuracy results.
+8. Remaining assessment evidence: ten distinct placements of one identified object with calliper ground truth, dimensional-error summaries, raw-versus-undistorted error comparison against ground truth, timing, failure severity sweep, and the <=5-minute Loom.
 
 ## Assessment constraints and reproducibility
 
