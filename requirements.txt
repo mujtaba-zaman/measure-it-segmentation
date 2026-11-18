@@ -1,6 +1,4 @@
-numpy==2.2.6
-opencv-contrib-python==4.11.0.86
-Pillow==11.2.1
-torch
-torchvision
-reportlab
+numpy==2.5.5
+opencv-contrib-python==5.1.0.95
+Pillow==13.0.0
+reportlab==5.1.0
