@@ -1,14 +1,14 @@
-# Marker measurement run
+# Fresh marker measurement run
 
-The saved Colab output is archived in `measurement_results.csv`; annotated overlays are beside it. The model and scale fallback ran on all ten uploaded filenames using the printed marker's reported 50 mm outer edge.
+The current photo batch is `measurement/marker_photos/fresh_batch/`. It contains 10 photos: `img_001`–`img_004` show the iPhone X target; `img_005`–`img_010` show a Tecno-branded phone. The outside marker edge is 50 mm.
 
-| Image | Undistorted estimate (mm) | Raw estimate (mm) |
-|---|---:|---:|
-| `img_001.jpeg` | 73.30 × 143.71 | 73.43 × 147.69 |
-| `img_002.jpeg` | 73.05 × 143.18 | 73.87 × 143.75 |
-| `img_003.jpeg` | 72.64 × 148.43 | 73.47 × 151.02 |
-| `img_004.jpeg` | 73.19 × 152.34 | 74.57 × 155.38 |
+The model returned an estimate for every frame in raw and undistorted modes (20/20 runs). The marker square was detected in all 10 photos. Per-frame estimates, confidence scores and scale factors are in `measurement/marker_results/fresh_batch/measurement_results.csv`; marker detections are in `measurement/marker_results/fresh_batch/marker_check.csv`.
 
-Mean of the four successful frames: **73.04 × 146.91 mm undistorted**, **73.83 × 149.46 mm raw**. Six frames (`img_005.jpeg` through `img_010.jpeg`) were refused because the marker square could not be isolated. The saved set also contains an exact duplicate (`img_009.jpeg` / `img_010.jpeg`).
+| Device group | Frames | Undistorted mean (mm) | Raw mean (mm) |
+|---|---|---:|---:|
+| iPhone X | 001–004 | 73.04 × 146.91 | 73.83 × 149.46 |
+| Tecno-branded phone | 005–010 | 81.68 × 175.98 | 85.14 × 177.21 |
 
-These are model estimates, not validated dimensional measurements: no calliper ground truth was recorded, and the marker was partly occluded in several frames. The detector's confidence is segmentation confidence; it is not a measurement-accuracy confidence interval. Do not claim dimensional MAE or accuracy from these results.
+For the iPhone X frames, undistorted estimates ranged from 72.64–73.30 mm wide and 143.18–152.34 mm long; raw estimates ranged from 73.43–74.57 mm wide and 143.75–155.38 mm long. Confidence scores across the batch ranged from 0.8723 to 0.9989.
+
+These are model estimates, not validated dimensions. No calliper ground truth was collected, and confidence is a segmentation score rather than an accuracy interval. The devices are reported separately; do not treat the combined mean as a measurement of one object. Dimensional error, a controlled raw-versus-undistorted accuracy comparison, timing and a failure-severity sweep remain unmeasured.

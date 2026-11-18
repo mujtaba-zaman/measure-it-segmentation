@@ -8,10 +8,10 @@ AI/CV assessment project for estimating a flat object's dimensions in millimetre
 - 100 unmarked target photos are assigned once to 70 train, 20 validation and 10 test. The split lists and raw-image SHA-256 manifest are frozen in commit `975d786` before training. Test images must not be used for training, tuning or checkpoint selection.
 - The 100 raw photos are preserved under `dataset/raw_images/`; normalized, undistorted copies used for modeling are under `dataset/images/{train,val,test}/`.
 - 20 unique checkerboard views were detected and used. Portrait frames are rotated clockwise into landscape coordinates. Calibration saved to `calibration/intrinsics.json`: image size 1280x960, RMS reprojection error 1.565 px, mean per-view error 1.150 px.
-- 10 target-plus-marker photos are in `measurement/marker_photos/`; `img_009.jpeg` and `img_010.jpeg` are exact duplicates, leaving 9 distinct frames.
+- The current target-plus-marker batch is `measurement/marker_photos/fresh_batch/`: 10 photos, with iPhone X in frames 001–004 and a Tecno-branded phone in frames 005–010.
 - 100 binary phone masks are now present: 70 train, 20 validation and 10 reserved test. `scripts/check_labels.py` reports all 100 masks nonempty and dimension-matched. The held-out test labels have not been used for training or tuning.
 - Mask R-CNN was trained for 10 epochs on a Colab Tesla T4. Best recorded validation pixel IoU was 0.9662. On the 10-image held-out segmentation test, mean mask IoU was 0.9680 and the evaluator reported mAP@0.5 and mAP@0.5:0.95 of 1.0. These are segmentation metrics, not physical measurement accuracy.
-- The trained checkpoint, training history, held-out metrics, four successful measurement overlays, and the full 10-photo measurement attempt are saved in this project. Four frames produced estimates; six were safely refused because the 50 mm reference square was occluded or could not be isolated. The ten frames include one exact duplicate. No calliper ground-truth measurements were collected, so dimensional accuracy/error is not established.
+- The trained checkpoint, training history and held-out segmentation metrics are saved in this project. The current marker batch yielded estimates for all 10 images in both raw and undistorted modes (20/20 runs); 50 mm marker-square detection passed for all 10. Measurement outputs are in `measurement/marker_results/fresh_batch/`. No calliper ground truth was collected, so these estimates do not establish dimensional accuracy.
 
 ## Setup
 
@@ -43,7 +43,7 @@ For CUDA, use the matching index from the official PyTorch installer. A Google C
 6. Run the measurement command on a photo with the full marker visible in the same plane:
    `\.venv\Scripts\python.exe inference/measure.py path\to\new.jpg --marker-mm <measured-size>`
    Add `--skip-undistortion` for the raw-image comparison and use separate `--output` paths to preserve both overlays.
-7. Current fresh-batch inference is recorded in `measurement/marker_results/fresh_batch/measurement_results.csv`: all 10 photos produced raw and undistorted estimates (20/20 runs). Marker-square detection is separately recorded in `marker_check.csv` (10/10). The submitted frames 005–010 visibly show a Tecno-branded phone, so keep them identified separately from the iPhone X frames 001–004. No calliper ground truth is available; these are estimates, not validated dimensions or accuracy results.
+7. Current inference is recorded in `measurement/marker_results/fresh_batch/measurement_results.csv`: all 10 photos produced raw and undistorted estimates (20/20 runs). Marker-square detection is in `marker_check.csv` (10/10). Frames 001–004 show the iPhone X; frames 005–010 show a Tecno-branded phone and are reported separately. No calliper ground truth is available; these estimates do not establish accuracy.
 8. Remaining assessment evidence: ten distinct placements of one identified object with calliper ground truth, dimensional-error summaries, raw-versus-undistorted error comparison against ground truth, timing, failure severity sweep, and the <=5-minute Loom.
 
 ## Assessment constraints and reproducibility
