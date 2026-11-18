@@ -1,0 +1,22 @@
+{
+  "test_images": 10,
+  "score_threshold": 0.5,
+  "mean_mask_iou": 0.9680282607763091,
+  "precision_at_iou50": 1.0,
+  "recall_at_iou50": 1.0,
+  "mAP50": 1.0,
+  "mAP50_95": 1.0,
+  "ap_by_iou_threshold": {
+    "0.50": 1.0,
+    "0.55": 1.0,
+    "0.60": 1.0,
+    "0.65": 1.0,
+    "0.70": 1.0,
+    "0.75": 1.0,
+    "0.80": 1.0,
+    "0.85": 1.0,
+    "0.90": 1.0,
+    "0.95": 1.0
+  },
+  "note": "101-point interpolated AP; one top-scoring instance prediction per image; test split used only for this final evaluation."
+}

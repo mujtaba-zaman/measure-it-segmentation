@@ -1,0 +1,11 @@
+image,score,mask_iou,predicted,true_positive_iou50
+images/test/WhatsApp Image 2026-11-18 at 3.26.08 PM (6).jpeg,0.9995181560516357,0.9735041321301453,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.23.07 PM (14).jpeg,0.9996368885040283,0.9607737823895,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.25.06 PM (22).jpeg,0.9994562268257141,0.9559102127539253,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.26.08 PM (5).jpeg,0.9993094205856323,0.9743606068323207,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.23.07 PM (5).jpeg,0.999506950378418,0.9731609783964164,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.23.07 PM (15).jpeg,0.9998107552528381,0.9699306124968039,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.25.06 PM (25).jpeg,0.9987581968307495,0.9668389773886135,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.23.07 PM (11).jpeg,0.9998341798782349,0.9577700000940849,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.23.07 PM (12).jpeg,0.9998121857643127,0.9726747520634474,True,True
+images/test/WhatsApp Image 2026-11-18 at 3.26.08 PM (3).jpeg,0.9996751546859741,0.9753585532178334,True,True

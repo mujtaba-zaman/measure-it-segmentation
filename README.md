@@ -1,6 +1,6 @@
 # Measure It - Segmentation and Metric Measurement
 
-AI/CV assessment project for measuring a flat object in millimetres. It calibrates a fixed camera with OpenCV, trains a torchvision Mask R-CNN on reviewed masks of project-captured photos, and uses a measured coplanar ArUco marker as the image scale reference. YOLO and Roboflow segmentation models are not used.
+AI/CV assessment project for estimating a flat object's dimensions in millimetres. It calibrates a fixed camera with OpenCV, trains a torchvision Mask R-CNN on project-captured phone images, and uses a known-size printed square reference in the object's plane. The supplied marker is inverted relative to OpenCV's standard ArUco polarity, so inference falls back to its isolated outer square. YOLO and Roboflow segmentation models are not used.
 
 ## Dataset and current results
 
@@ -8,9 +8,10 @@ AI/CV assessment project for measuring a flat object in millimetres. It calibrat
 - 100 unmarked target photos are assigned once to 70 train, 20 validation and 10 test. The split lists and raw-image SHA-256 manifest are frozen in commit `975d786` before training. Test images must not be used for training, tuning or checkpoint selection.
 - The 100 raw photos are preserved under `dataset/raw_images/`; normalized, undistorted copies used for modeling are under `dataset/images/{train,val,test}/`.
 - 20 unique checkerboard views were detected and used. Portrait frames are rotated clockwise into landscape coordinates. Calibration saved to `calibration/intrinsics.json`: image size 1280x960, RMS reprojection error 1.565 px, mean per-view error 1.150 px.
-- 10 target-plus-marker photos are in `dataset/measurement_images/`, but `img_009.jpeg` and `img_010.jpeg` are exact duplicates; there are 9 distinct photos. Retake one before using this as a 10-instance accuracy set.
+- 10 target-plus-marker photos are in `measurement/marker_photos/`; `img_009.jpeg` and `img_010.jpeg` are exact duplicates, leaving 9 distinct frames.
 - 100 binary phone masks are now present: 70 train, 20 validation and 10 reserved test. `scripts/check_labels.py` reports all 100 masks nonempty and dimension-matched. The held-out test labels have not been used for training or tuning.
-- Model training has not run. PyTorch 2.14 and TorchVision 0.29 CPU wheels install in the local Python 3.15 environment, but Windows Application Control blocks loading `torch/lib/shm.dll`. Use `colab/measure_it_training.ipynb` and `measure-it-colab-bundle.zip` for the Colab route. No model performance or measurement accuracy is claimed yet.
+- Mask R-CNN was trained for 10 epochs on a Colab Tesla T4. Best recorded validation pixel IoU was 0.9662. On the 10-image held-out segmentation test, mean mask IoU was 0.9680 and the evaluator reported mAP@0.5 and mAP@0.5:0.95 of 1.0. These are segmentation metrics, not physical measurement accuracy.
+- The trained checkpoint, training history, held-out metrics, four successful measurement overlays, and the full 10-photo measurement attempt are saved in this project. Four frames produced estimates; six were safely refused because the 50 mm reference square was occluded or could not be isolated. The ten frames include one exact duplicate. No calliper ground-truth measurements were collected, so dimensional accuracy/error is not established.
 
 ## Setup
 
@@ -31,7 +32,7 @@ For CUDA, use the matching index from the official PyTorch installer. A Google C
 
 ## Workflow
 
-1. Verify checkerboard square size is 20 mm and measure the marker's black outer edge with a ruler. The PDF says nominally 50 mm, but use the physical measurement.
+1. Checkerboard square size used: 20 mm. The printed reference marker's outside black edge is treated as 50 mm, as measured/reported for this run.
 2. Calibration already ran on 20 checkerboard images:
    `\.venv\Scripts\python.exe calibration/calibrate.py --square-mm 20 --columns 9 --rows 7`
 3. Annotate one accurate phone silhouette mask per split image. Run `\.venv\Scripts\python.exe scripts/annotate_masks.py --split train`, then `val`, then `test`. Press `A` for a threshold-based outline proposal, inspect the green edge, and press `S` only if it is correct; otherwise press `R` and draw the outline with left-clicks. Press `F` to preview and `S` to save. Masks are 0 background / 255 phone at `dataset/labels/<image-stem>.png`. Review every outline; do not use test results to adjust training.
@@ -39,11 +40,11 @@ For CUDA, use the matching index from the official PyTorch installer. A Google C
    `\.venv\Scripts\python.exe models/train.py --epochs 10 --seed 42`
 5. After the checkpoint and confidence threshold are frozen, run the final held-out metrics once:
    `\.venv\Scripts\python.exe models/evaluate.py --weights models/maskrcnn.pt`
-6. Run the measurement command on a new photo with the marker visible in the same plane:
+6. Run the measurement command on a photo with the full marker visible in the same plane:
    `\.venv\Scripts\python.exe inference/measure.py path\to\new.jpg --marker-mm <measured-size>`
    Add `--skip-undistortion` for the raw-image comparison and use separate `--output` paths to preserve both overlays.
-7. Compare at least 10 separate placements against ruler/calliper ground truth; report per-instance and summary errors, raw-versus-undistorted performance, one failure condition, and five-run timing.
-8. Complete `docs/Plan.md`, `docs/Objectives.md`, and `docs/Definition-of-Done.md` with evidence. Record a Loom of 5 minutes or less answering the four assessment questions.
+7. Current measurement evidence is in `measurement/marker_results/`. Four of ten frames produced estimates in both raw and undistorted modes; six were refused because the reference could not be isolated. The images include one exact duplicate. These estimates have no calliper ground truth, so do not present them as validated dimensions or measurement-accuracy results.
+8. Remaining assessment evidence: ten distinct placements with calliper ground truth, dimensional-error summaries, raw-versus-undistorted error comparison, timing, failure severity sweep, and the <=5-minute Loom.
 
 ## Assessment constraints and reproducibility
 

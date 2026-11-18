@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def build_model(weights_path, device):
-    model = maskrcnn_resnet50_fpn(weights=None)
+    # The checkpoint contains the full trained backbone; don't fetch ImageNet
+    # weights again when rebuilding the model for evaluation.
+    model = maskrcnn_resnet50_fpn(weights=None, weights_backbone=None)
     model.roi_heads.box_predictor.cls_score = torch.nn.Linear(
         model.roi_heads.box_predictor.cls_score.in_features, 2)
     model.roi_heads.box_predictor.bbox_pred = torch.nn.Linear(

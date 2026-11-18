@@ -17,9 +17,27 @@ def main():
  else:
   nk,_=cv2.getOptimalNewCameraMatrix(k,d,(w,h),1,(w,h)); im=cv2.undistort(raw,k,d,None,nk)
  aruco=cv2.aruco; dictionary=aruco.getPredefinedDictionary(aruco.DICT_4X4_50); detector=aruco.ArucoDetector(dictionary,aruco.DetectorParameters()); corners,ids,_=detector.detectMarkers(im)
- if ids is None: raise SystemExit('REFUSED: reference ArUco marker not found')
- side_px=float(np.mean([np.linalg.norm(c[0][i]-c[0][(i+1)%4]) for c in corners for i in range(4)])); mm_per_px=a.marker_mm/side_px
- dev=torch.device('cuda' if torch.cuda.is_available() else 'cpu'); model=maskrcnn_resnet50_fpn(weights=None); model.roi_heads.box_predictor.cls_score=torch.nn.Linear(model.roi_heads.box_predictor.cls_score.in_features,2); model.roi_heads.box_predictor.bbox_pred=torch.nn.Linear(model.roi_heads.box_predictor.bbox_pred.in_features,8)
+ if ids is not None:
+  marker_corners=corners[0][0]
+  side_px=float(np.mean([np.linalg.norm(marker_corners[i]-marker_corners[(i+1)%4]) for i in range(4)]))
+ else:
+  # The supplied printable has an inverted ArUco design; its measured 50 mm
+  # outside black square remains a usable scale target when the tag decoder fails.
+  gray=cv2.cvtColor(im,cv2.COLOR_BGR2GRAY); _,binary=cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+  contours,_=cv2.findContours(binary,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE); candidates=[]
+  for contour in contours:
+   area=cv2.contourArea(contour)
+   if not (0.015*w*h < area < 0.18*w*h): continue
+   perimeter=cv2.arcLength(contour,True); poly=cv2.approxPolyDP(contour,0.025*perimeter,True)
+   if len(poly)!=4 or not cv2.isContourConvex(poly): continue
+   pts=poly.reshape(4,2).astype(np.float32)
+   sides=[np.linalg.norm(pts[i]-pts[(i+1)%4]) for i in range(4)]
+   if min(sides)<=0 or max(sides)/min(sides)>1.35: continue
+   candidates.append((area,pts,sides))
+  if not candidates: raise SystemExit('REFUSED: neither ArUco tag nor isolated 50 mm square detected')
+  _,marker_corners,sides=max(candidates,key=lambda item:item[0]); side_px=float(np.mean(sides)); corners=[marker_corners.reshape(1,4,2)]; ids=np.array([[0]])
+ mm_per_px=a.marker_mm/side_px
+ dev=torch.device('cuda' if torch.cuda.is_available() else 'cpu'); model=maskrcnn_resnet50_fpn(weights=None,weights_backbone=None); model.roi_heads.box_predictor.cls_score=torch.nn.Linear(model.roi_heads.box_predictor.cls_score.in_features,2); model.roi_heads.box_predictor.bbox_pred=torch.nn.Linear(model.roi_heads.box_predictor.bbox_pred.in_features,8)
  from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
  old=model.roi_heads.mask_predictor; model.roi_heads.mask_predictor=MaskRCNNPredictor(old.conv5_mask.in_channels,256,2)
  state=torch.load(a.weights,map_location='cpu',weights_only=False); model.load_state_dict(state['model']); model.to(dev).eval()
