@@ -9,7 +9,8 @@ AI/CV assessment project for measuring a flat object in millimetres. It calibrat
 - The 100 raw photos are preserved under `dataset/raw_images/`; normalized, undistorted copies used for modeling are under `dataset/images/{train,val,test}/`.
 - 20 unique checkerboard views were detected and used. Portrait frames are rotated clockwise into landscape coordinates. Calibration saved to `calibration/intrinsics.json`: image size 1280x960, RMS reprojection error 1.565 px, mean per-view error 1.150 px.
 - 10 target-plus-marker photos are in `dataset/measurement_images/`, but `img_009.jpeg` and `img_010.jpeg` are exact duplicates; there are 9 distinct photos. Retake one before using this as a 10-instance accuracy set.
-- Binary object masks are not yet present. Model training, held-out evaluation and physical accuracy measurement have not run. No model performance or measurement accuracy is claimed.
+- 100 binary phone masks are now present: 70 train, 20 validation and 10 reserved test. `scripts/check_labels.py` reports all 100 masks nonempty and dimension-matched. The held-out test labels have not been used for training or tuning.
+- Model training has not run. PyTorch 2.14 and TorchVision 0.29 CPU wheels install in the local Python 3.15 environment, but Windows Application Control blocks loading `torch/lib/shm.dll`. Use `colab/measure_it_training.ipynb` and `measure-it-colab-bundle.zip` for the Colab route. No model performance or measurement accuracy is claimed yet.
 
 ## Setup
 
