@@ -33,7 +33,7 @@ For CUDA, use the matching index from the official PyTorch installer. A Google C
 1. Verify checkerboard square size is 20 mm and measure the marker's black outer edge with a ruler. The PDF says nominally 50 mm, but use the physical measurement.
 2. Calibration already ran on 20 checkerboard images:
    `\.venv\Scripts\python.exe calibration/calibrate.py --square-mm 20 --columns 9 --rows 7`
-3. Annotate one accurate phone silhouette mask per split image. Run `\.venv\Scripts\python.exe scripts/annotate_masks.py --split train`, then `val`, then `test`. Left-click around the phone outline, press `F` to preview and `S` to save. Masks are 0 background / 255 phone at `dataset/labels/<image-stem>.png`. Review every outline; do not use test results to adjust training.
+3. Annotate one accurate phone silhouette mask per split image. Run `\.venv\Scripts\python.exe scripts/annotate_masks.py --split train`, then `val`, then `test`. Press `A` for a threshold-based outline proposal, inspect the green edge, and press `S` only if it is correct; otherwise press `R` and draw the outline with left-clicks. Press `F` to preview and `S` to save. Masks are 0 background / 255 phone at `dataset/labels/<image-stem>.png`. Review every outline; do not use test results to adjust training.
 4. Train only after masks and the fixed split are committed:
    `\.venv\Scripts\python.exe models/train.py --epochs 10 --seed 42`
 5. After the checkpoint and confidence threshold are frozen, run the final held-out metrics once:

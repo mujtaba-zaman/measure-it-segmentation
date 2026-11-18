@@ -1,7 +1,8 @@
 """Create reviewed binary phone masks by outlining each image in a local window.
 
-Controls: left click adds polygon points, right click removes the last point,
-F previews the filled mask, S saves it, R resets, N skips, Q quits.
+Controls: A proposes a threshold-based outline (inspect it), left click adds
+polygon points, right click removes the last point, F previews, S saves, R
+resets, N skips, Q quits.
 """
 import argparse
 from pathlib import Path
@@ -31,6 +32,24 @@ def main():
     window = "Measure It - polygon mask annotator"
     state = {"image": None, "points": [], "finished": False, "scale": 1.0}
 
+    def propose_outline(image):
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        border = max(3, round(min(binary.shape) * 0.004))
+        binary[:border] = binary[-border:] = 0
+        binary[:, :border] = binary[:, -border:] = 0
+        binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE,
+                                  cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13)))
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = [c for c in contours if 0.005 * image.shape[0] * image.shape[1] < cv2.contourArea(c)
+                    < 0.75 * image.shape[0] * image.shape[1]]
+        if not contours:
+            return []
+        contour = max(contours, key=cv2.contourArea)
+        polygon = cv2.approxPolyDP(contour, 0.006 * cv2.arcLength(contour, True), True)
+        return [tuple(point[0]) for point in polygon] if len(polygon) >= 3 else []
+
     def render():
         image = state["image"]
         if image is None:
@@ -47,7 +66,7 @@ def main():
             overlay = view.copy()
             overlay[mask > 0] = (0.35 * overlay[mask > 0] + 0.65 * np.array([40, 210, 40])).astype(np.uint8)
             view = overlay
-        cv2.putText(view, "Left:add  Right:undo  F:finish  S:save  R:reset  N:skip  Q:quit",
+        cv2.putText(view, "A:auto outline (inspect)  Left:add  Right:undo  F:preview  S:save  R:reset  N:skip  Q:quit",
                     (12, 26), cv2.FONT_HERSHEY_SIMPLEX, 0.58, (20, 20, 230), 2, cv2.LINE_AA)
         scale = state["scale"]
         if scale != 1:
@@ -92,7 +111,16 @@ def main():
                 key = cv2.waitKey(0) & 0xFF
                 if key in (ord("q"), 27):
                     return
-                if key == ord("r"):
+                if key == ord("a"):
+                    proposal = propose_outline(image)
+                    if proposal:
+                        state["points"] = proposal
+                        state["finished"] = True
+                        print("Auto outline is only a proposal: inspect the green edge before saving.")
+                    else:
+                        print("No safe auto outline found; draw the phone boundary manually.")
+                    render()
+                elif key == ord("r"):
                     state["points"] = []
                     state["finished"] = False
                     render()
